@@ -34,7 +34,7 @@ function Screen() {
   };
 
   this.get = function (name, page) {
-    this.uiObjects.forEach((e) => print(e.name));
+    Object.keys(this.uiObjects[page]).forEach((e) => print(e.name));
     if (!this.uiObjects[page]) return null;
     return this.uiObjects[page][name];
   }
