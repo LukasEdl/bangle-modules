@@ -132,6 +132,8 @@ function Screen() {
     r2: function(){this.active&&(g.setColor(this.color),g.fillPoly([this.p1x,this.p1y,this.p2x,this.p2y,this.p3x,this.p3y]))},
     o3: function(n){if(!this.active)return;let t={x:this.p1x,y:this.p1y},r={x:this.p1x,y:this.p1y};return t.x=this.p2x<t.x?this.p2x:t.x,t.x=this.p3x<t.x?this.p3x:t.x,t.y=this.p2y<t.y?this.p2y:t.y,t.y=this.p3y<t.y?this.p3y:t.y,r.x=this.p2x>r.x?this.p2x:r.x,r.x=this.p3x>r.x?this.p3x:r.x,r.y=this.p2y>r.y?this.p2y:r.y,r.y=this.p3y>r.y?this.p3y:r.y,t.x-=this.hitBoxOffsetXLeft,t.y-=this.hitBoxOffsetYTop,r.x+=this.hitBoxOffsetXRight,r.y+=this.hitBoxOffsetYBottom,e=n.x>=t.x&&n.x<=r.x&&n.y>=t.y&&n.y<=r.y,e&&this.vibrate&&Bangle.buzz(100,.2),e},
     m4: function(n,t){this.p1x+=n,this.p2x+=n,this.p3x+=n,this.p1y+=t,this.p2y+=t,this.p3y+=t},
+    r5: function(){if(!this.active)return;g.setColor(this.backgroundColor),g.fillRect(this.x,this.y,this.x+this.width,this.y+this.height),g.setColor(this.textColor),g.setFontVector(this.fontSize);const n=g.stringWidth(this.text);g.drawString(this.text,this.x+this.width/2-n/2,this.y+this.height/2-this.fontSize/2,!1)},
+    o6: function(n){if(!this.active)return;const t=this.x-this.hitBoxOffsetXLeft<=n.x&&n.x<=this.x+this.width+this.hitBoxOffsetXRight&&this.y-this.hitBoxOffsetYTop<=n.y&&n.y<=this.y+this.height+this.hitBoxOffsetYBottom;return t&&this.vibrate&&Bangle.buzz(100,.2),t},
   };
 
   const uiObjects = {
@@ -410,6 +412,35 @@ function Screen() {
         render: function anonymous(
         ) {
           globalFunctions['r0'].call(this);
+        },
+        moveElement: function anonymous(x,y
+        ) {
+          return globalFunctions['m1'].bind(this)(x,y);
+        },
+      },
+      {
+        active: true,
+        name: "cachedRequestCounter",
+        x: 141,
+        y: 55,
+        width: 30,
+        height: 30,
+        backgroundColor: "#ffff00",
+        textColor: "#000000",
+        fontSize: 20,
+        text: "0",
+        hitBoxOffsetXLeft: 10,
+        hitBoxOffsetXRight: 10,
+        hitBoxOffsetYTop: 10,
+        hitBoxOffsetYBottom: 10,
+        vibrate: true,
+        render: function anonymous(
+        ) {
+          globalFunctions['r5'].call(this);
+        },
+        onScreenTouch: function anonymous(e
+        ) {
+          return globalFunctions['o6'].bind(this)(e);
         },
         moveElement: function anonymous(x,y
         ) {
