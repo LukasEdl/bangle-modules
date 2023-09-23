@@ -169,7 +169,7 @@ function Screen() {
         name: "setNr",
         text: "3",
         x: 5,
-        y: 113,
+        y: 111,
         lineCount: 1,
         width: 30,
         fontSize: 22,
@@ -349,7 +349,7 @@ function Screen() {
         name: "zqMJAz0-3du-herAcpLAj",
         text: "Set Nr:",
         x: 5,
-        y: 78,
+        y: 76,
         lineCount: 2,
         width: 30,
         fontSize: 15,
@@ -387,6 +387,46 @@ function Screen() {
         onScreenTouch: function anonymous(e
         ) {
           return globalFunctions['o6'].bind(this)(e);
+        },
+        moveElement: function anonymous(x,y
+        ) {
+          return globalFunctions['m1'].bind(this)(x,y);
+        },
+      },
+      {
+        active: true,
+        name: "pauseText",
+        text: "Pause",
+        x: 4,
+        y: 138,
+        lineCount: 1,
+        width: 50,
+        fontSize: 13,
+        textAlignment: "LEFT",
+        fitText: false,
+        render: function anonymous(
+        ) {
+          globalFunctions['r0'].call(this);
+        },
+        moveElement: function anonymous(x,y
+        ) {
+          return globalFunctions['m1'].bind(this)(x,y);
+        },
+      },
+      {
+        active: true,
+        name: "pauseTimer",
+        text: "0",
+        x: 8,
+        y: 153,
+        lineCount: 1,
+        width: 30,
+        fontSize: 17,
+        textAlignment: "CENTER",
+        fitText: false,
+        render: function anonymous(
+        ) {
+          globalFunctions['r0'].call(this);
         },
         moveElement: function anonymous(x,y
         ) {
