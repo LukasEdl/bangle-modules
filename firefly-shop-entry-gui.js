@@ -57,6 +57,20 @@ function Screen() {
 
     let lastEvent;
 
+    function resetPressTimer() {
+      if (continueId) {
+        clearInterval(continueId);
+      }
+      start = 0;
+      lastEvent = null;
+    }
+
+    Bangle.on('lock', function (on) {
+      if (!on) {
+        resetPressTimer();
+      }
+    });
+
     function onDrag(event) {
 
       let isPressed = event.b === 1;
@@ -85,8 +99,7 @@ function Screen() {
             this.buttonUpdate(lastEvent.x, lastEvent.y);
           }
         }
-        start = 0;
-        lastEvent = null;
+        resetPressTimer();
       }
 
     }
@@ -127,13 +140,112 @@ function Screen() {
     this.render();
   }
 
-  const globalFunctions = {r0: function(){if(!this.active)return;let n=this.fontSize;if(g.setFontVector(n),this.fitText){let t=g.stringWidth(this.text);for(;t/this.lineCount>this.width&&n>0;)n-=1,g.setFontVector(n),t=g.stringWidth(this.text);0===n&&g.setFontVector(n)}let t=[],e="";for(let n=0;n<this.text.length;n++)g.stringWidth(e)>this.width?(t.push(e),e=this.text[n]):e+=this.text[n];0!==e.length&&t.push(e),t=t.splice(0,this.lineCount);for(let e=0;e<t.length;e++){let r=0;"CENTER"===this.textAlignment&&(r=this.width/2-g.stringWidth(t[e])/2),g.drawString(t[e],this.x+r,this.y+(this.fontSize-n)/2+this.fontSize*e,!0)}},
-    m1: function(n,t){this.x+=n,this.y+=t},
-    r2: function(){this.active&&(g.setColor(this.color),g.fillPoly([this.p1x,this.p1y,this.p2x,this.p2y,this.p3x,this.p3y]))},
-    o3: function(n){if(!this.active)return;let t={x:this.p1x,y:this.p1y},r={x:this.p1x,y:this.p1y};return t.x=this.p2x<t.x?this.p2x:t.x,t.x=this.p3x<t.x?this.p3x:t.x,t.y=this.p2y<t.y?this.p2y:t.y,t.y=this.p3y<t.y?this.p3y:t.y,r.x=this.p2x>r.x?this.p2x:r.x,r.x=this.p3x>r.x?this.p3x:r.x,r.y=this.p2y>r.y?this.p2y:r.y,r.y=this.p3y>r.y?this.p3y:r.y,t.x-=this.hitBoxOffsetXLeft,t.y-=this.hitBoxOffsetYTop,r.x+=this.hitBoxOffsetXRight,r.y+=this.hitBoxOffsetYBottom,e=n.x>=t.x&&n.x<=r.x&&n.y>=t.y&&n.y<=r.y,e&&this.vibrate&&Bangle.buzz(100,.2),e},
-    m4: function(n,t){this.p1x+=n,this.p2x+=n,this.p3x+=n,this.p1y+=t,this.p2y+=t,this.p3y+=t},
-    r5: function(){if(!this.active)return;g.setColor(this.backgroundColor),g.fillRect(this.x,this.y,this.x+this.width,this.y+this.height),g.setColor(this.textColor),g.setFontVector(this.fontSize);const n=g.stringWidth(this.text);g.drawString(this.text,this.x+this.width/2-n/2,this.y+this.height/2-this.fontSize/2,!1)},
-    o6: function(n){if(!this.active)return;const t=this.x-this.hitBoxOffsetXLeft<=n.x&&n.x<=this.x+this.width+this.hitBoxOffsetXRight&&this.y-this.hitBoxOffsetYTop<=n.y&&n.y<=this.y+this.height+this.hitBoxOffsetYBottom;return t&&this.vibrate&&Bangle.buzz(100,.2),t},
+  const globalFunctions = {r0: function () {
+      if (!this.active) return;
+      let activeFontSize = this.fontSize;
+      g.setFontVector(activeFontSize);
+
+      if (this.fitText) {
+        let overallLength = g.stringWidth(this.text);
+        while (overallLength / this.lineCount > this.width && activeFontSize > 0) {
+          activeFontSize -= 1;
+          g.setFontVector(activeFontSize);
+          overallLength = g.stringWidth(this.text);
+        }
+        if (activeFontSize === 0) {
+          g.setFontVector(activeFontSize);
+        }
+      }
+
+      let lines = [];
+      let currentLine = '';
+
+      for (let i = 0; i < this.text.length; i++) {
+        if (g.stringWidth(currentLine) > this.width) {
+          lines.push(currentLine);
+          currentLine = this.text[i];
+        } else {
+          currentLine += this.text[i];
+        }
+      }
+      if (currentLine.length !== 0) {
+        lines.push(currentLine);
+      }
+
+      lines = lines.splice(0, this.lineCount);
+      for (let i = 0; i < lines.length; i++) {
+        let alignmentOffset = 0;
+        if (this.textAlignment === 'CENTER') {
+          alignmentOffset = this.width / 2 - g.stringWidth(lines[i]) / 2;
+        }
+        g.drawString(lines[i], this.x + alignmentOffset, this.y + (this.fontSize - activeFontSize) / 2 + this.fontSize * i, true);
+      }
+    },
+    m1: function (x, y) {
+      this.x += x;
+      this.y += y;
+    },
+    r2: function () {
+      if (!this.active) return;
+      g.setColor(this.color);
+      g.fillPoly([this.p1x, this.p1y, this.p2x, this.p2y, this.p3x, this.p3y]);
+
+    },
+    o3: function (e) {
+      if (!this.active) return;
+
+      let tl = {x: this.p1x, y: this.p1y};
+      let br = {x: this.p1x, y: this.p1y};
+
+      tl.x = this.p2x < tl.x ? this.p2x : tl.x;
+      tl.x = this.p3x < tl.x ? this.p3x : tl.x;
+
+      tl.y = this.p2y < tl.y ? this.p2y : tl.y;
+      tl.y = this.p3y < tl.y ? this.p3y : tl.y;
+
+      br.x = this.p2x > br.x ? this.p2x : br.x;
+      br.x = this.p3x > br.x ? this.p3x : br.x;
+
+      br.y = this.p2y > br.y ? this.p2y : br.y;
+      br.y = this.p3y > br.y ? this.p3y : br.y;
+      tl.x -= this.hitBoxOffsetXLeft;
+      tl.y -= this.hitBoxOffsetYTop;
+      br.x += this.hitBoxOffsetXRight;
+      br.y += this.hitBoxOffsetYBottom;
+
+      tapped = e.x >= tl.x && e.x <= br.x && e.y >= tl.y && e.y <= br.y;
+      if (tapped && this.vibrate) {
+        Bangle.buzz(100, 0.2);
+      }
+      return tapped;
+    },
+    m4: function (x, y) {
+      this.p1x += x;
+      this.p2x += x;
+      this.p3x += x;
+
+      this.p1y += y;
+      this.p2y += y;
+      this.p3y += y;
+    },
+    r5: function () {
+      if (!this.active) return;
+      g.setColor(this.backgroundColor);
+      g.fillRect(this.x, this.y, this.x + this.width, this.y + this.height);
+      g.setColor(this.textColor);
+      g.setFontVector(this.fontSize);
+      const stringWidth = g.stringWidth(this.text);
+      g.drawString(this.text, this.x + this.width / 2 - stringWidth / 2, this.y + this.height / 2 - this.fontSize / 2, false);
+    },
+    o6: function (e) {
+      if (!this.active) return;
+
+      const wasTapped = this.x - this.hitBoxOffsetXLeft <= e.x && e.x <= this.x + this.width + this.hitBoxOffsetXRight && this.y - this.hitBoxOffsetYTop <= e.y && e.y <= this.y + this.height + this.hitBoxOffsetYBottom;
+      if (wasTapped && this.vibrate) {
+        Bangle.buzz(100, 0.2);
+      }
+      return wasTapped;
+    },
   };
 
   const uiObjects = {
