@@ -54,7 +54,10 @@ function Screen() {
   this.setupTouchHandling = () => {
     let start = 0;
     let continueId;
-
+    let startPosition = {
+      x: 0,
+      y: 0
+    }
     let lastEvent;
 
     function resetPressTimer() {
@@ -63,6 +66,10 @@ function Screen() {
       }
       start = 0;
       lastEvent = null;
+      startPosition = {
+        x: 0,
+        y: 0,
+      }
     }
 
     Bangle.on('lock', function (on) {
@@ -70,6 +77,10 @@ function Screen() {
         resetPressTimer();
       }
     });
+
+    function isStillOnStartPosition(startPosition, event) {
+      return Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)) < 2;
+    }
 
     function onDrag(event) {
 
@@ -80,12 +91,18 @@ function Screen() {
 
       if (isPressed && start === 0) {
         start = Date.now();
+        startPosition = {
+          x: event.x,
+          y: event.y,
+        }
         if (continueId) {
           clearInterval(continueId);
         }
         continueId = setInterval(() => {
 
-          this.buttonUpdate(lastEvent.x, lastEvent.y);
+          if (isStillOnStartPosition(startPosition, lastEvent)) {
+            this.buttonUpdate(lastEvent.x, lastEvent.y);
+          }
         }, 250);
       }
       if (!isPressed) {
@@ -96,7 +113,9 @@ function Screen() {
 
         if (dif <= 250) {
           if (lastEvent) {
-            this.buttonUpdate(lastEvent.x, lastEvent.y);
+            if (isStillOnStartPosition(startPosition, lastEvent)) {
+              this.buttonUpdate(lastEvent.x, lastEvent.y);
+            }
           }
         }
         resetPressTimer();
