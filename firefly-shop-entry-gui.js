@@ -92,14 +92,13 @@ function Screen() {
     function onDrag(event) {
 
       let isPressed = event.b === 1;
-      if (event.dx === 0 && event.dy === 0) {
-        console.log('update last event');
-        console.log(event);
-        lastEvent = event;
-      } else {
+      if (!(event.dx === 0 && event.dy === 0)) {
         resetPressTimer();
         return;
       }
+      console.log('update last event');
+      console.log(event);
+      lastEvent = event;
 
       if (isPressed && start === 0) {
         start = Date.now();
