@@ -79,6 +79,7 @@ function Screen() {
     });
 
     function isStillOnStartPosition(startPosition, event) {
+      console.log(Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)));
       return Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)) < 2;
     }
 
