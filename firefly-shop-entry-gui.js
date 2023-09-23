@@ -96,6 +96,9 @@ function Screen() {
         console.log('update last event');
         console.log(event);
         lastEvent = event;
+      } else {
+        resetPressTimer();
+        return;
       }
 
       if (isPressed && start === 0) {
