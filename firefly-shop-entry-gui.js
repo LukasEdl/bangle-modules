@@ -80,9 +80,11 @@ function Screen() {
 
     function isStillOnStartPosition(startPosition, event) {
       if (!startPosition || !event) {
-        console.log('no start position or event');
+        console.log('no start position or event ');
         return false;
       }
+      console.log('startPosition', startPosition);
+      console.log('event', event);
       console.log(Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)));
       return Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)) < 2;
     }
