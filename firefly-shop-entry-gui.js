@@ -79,13 +79,6 @@ function Screen() {
     });
 
     function isStillOnStartPosition(startPosition, event) {
-      if (!startPosition || !event) {
-        console.log('no start position or event ');
-        return false;
-      }
-      console.log('startPosition', startPosition);
-      console.log('event', event);
-      console.log(Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)));
       return Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)) < 2;
     }
 
@@ -96,8 +89,6 @@ function Screen() {
         resetPressTimer();
         return;
       }
-      console.log('update last event');
-      console.log(event);
       lastEvent = event;
 
       if (isPressed && start === 0) {
