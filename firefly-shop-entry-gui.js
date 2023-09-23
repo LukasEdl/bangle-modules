@@ -93,6 +93,8 @@ function Screen() {
 
       let isPressed = event.b === 1;
       if (event.dx === 0 && event.dy === 0) {
+        console.log('update last event');
+        console.log(event);
         lastEvent = event;
       }
 
