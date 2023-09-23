@@ -48,13 +48,58 @@ function Screen() {
     this.touchCallbacks[name] = callback;
   }
 
-  this.setupTouchHandling = () => {
-    const onTouch = (btn, e) => {
-      const touchedUiElements = this.uiObjectsToTouchCheck.filter((uiObject) => uiObject.onScreenTouch.bind(uiObject)(e));
-      touchedUiElements.forEach(element => this.touchCallbacks[element.name] ? this.touchCallbacks[element.name]() : null);
+  this.buttonUpdate = function (x, y) {
+    const e = {
+      x: x,
+      y: y,
     }
-    Bangle.on('touch', onTouch);
+    const touchedUiElements = this.uiObjectsToTouchCheck.filter((uiObject) => uiObject.onScreenTouch.bind(uiObject)(e));
+    touchedUiElements.forEach(element => this.touchCallbacks[element.name] ? this.touchCallbacks[element.name]() : null);
   }
+
+  this.setupTouchHandling = () => {
+    let start = 0;
+    let continueId;
+
+    let lastEvent;
+
+    function onDrag(event) {
+
+      let isPressed = event.b === 1;
+      if (event.dx === 0 && event.dy === 0) {
+        lastEvent = event;
+      }
+
+      if (isPressed && start === 0) {
+        start = Date.now();
+        if (continueId) {
+          clearInterval(continueId);
+        }
+        continueId = setInterval(() => {
+
+          this.buttonUpdate(lastEvent.x, lastEvent.y);
+        }, 250);
+      }
+      if (!isPressed) {
+        if (continueId) {
+          clearInterval(continueId);
+        }
+        let dif = Date.now() - start;
+
+        if (dif <= 250) {
+          if (lastEvent) {
+            this.buttonUpdate(lastEvent.x, lastEvent.y);
+          }
+        }
+        start = 0;
+        lastEvent = null;
+      }
+
+    }
+
+    Bangle.on('drag', onDrag.bind(this));
+  }
+
   this.setupDragHandling = () => {
     const onDrag = (e) => {
       if (!this.pageSettings[this.currentPage]) return;
@@ -805,6 +850,7 @@ function Screen() {
 
 
 function clear() {
+  g.reset();
   g.clearRect(0, 0, MAX_SCREEN_WIDTH, MAX_SCREEN_HEIGHT);
 }
 
