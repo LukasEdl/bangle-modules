@@ -7,9 +7,11 @@ function Screen() {
   this.uiObjects = {};
   this.uiObjectsToTouchCheck = [];
   this.touchCallbacks = {};
+  this.swipeCallback = null;
   this.pageSettings = {
     "quick-controls": {
-      "scrollable": false
+      "scrollable": false,
+      "swipeable": true
     },
   }
 
@@ -40,6 +42,10 @@ function Screen() {
 
   this.onTouch = function (name, callback) {
     this.touchCallbacks[name] = callback;
+  }
+
+  this.onSwipe = function (swipeCallback) {
+    this.swipeCallback = swipeCallback;
   }
 
   this.buttonUpdate = function (x, y) {
@@ -128,6 +134,37 @@ function Screen() {
     Bangle.on('drag', onDrag.bind(this));
   }
 
+  this.setupSwipeHandler = () => {
+    Bangle.on('stroke', (stroke) => {
+      if (!this.pageSettings[this.currentPage]) return;
+      if (!this.pageSettings[this.currentPage].swipeable || !this.swipeCallback) return;
+      const xy = stroke.xy;
+      // last x cord
+      const x1 = xy[0];
+      const y1 = xy[1]
+      const x2 = xy[xy.length - 2];
+      const y2 = xy[xy.length - 1];
+      const deltaX = x2 - x1;
+      const deltaY = y2 - y1;
+
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX >= 0) {
+          this.swipeCallback(0, x1, y1, x2, y2);
+        } else {
+          this.swipeCallback(1, x1, y1, x2, y2);
+        }
+      } else {
+        if (deltaY >= 0) {
+          this.swipeCallback(2, x1, y1, x2, y2);
+        } else {
+          this.swipeCallback(3, x1, y1, x2, y2);
+
+        }
+      }
+
+    });
+  }
+
   this.setupDragHandling = () => {
     const onDrag = (e) => {
       if (!this.pageSettings[this.currentPage]) return;
@@ -151,6 +188,7 @@ function Screen() {
     const pageUiElements = this.uiObjects[newPageName];
     this.uiObjectsToTouchCheck = [];
     this.uiObjectsToRender = [];
+    this.swipeCallback = null;
     Object.keys(pageUiElements).forEach((key) => {
       this.uiObjectsToRender.push(pageUiElements[key]);
       if (pageUiElements[key].onScreenTouch) {
@@ -295,6 +333,7 @@ function Screen() {
   this.switchToPage(this.currentPage);
   this.setupTouchHandling();
   this.setupDragHandling();
+  this.setupSwipeHandler();
 }
 
 
