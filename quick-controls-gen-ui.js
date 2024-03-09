@@ -42,13 +42,92 @@ function Screen() {
     this.touchCallbacks[name] = callback;
   }
 
-  this.setupTouchHandling = () => {
-    const onTouch = (btn, e) => {
-      const touchedUiElements = this.uiObjectsToTouchCheck.filter((uiObject) => uiObject.onScreenTouch.bind(uiObject)(e));
-      touchedUiElements.forEach(element => this.touchCallbacks[element.name] ? this.touchCallbacks[element.name]() : null);
+  this.buttonUpdate = function (x, y) {
+    const e = {
+      x: x,
+      y: y,
     }
-    Bangle.on('touch', onTouch);
+    const touchedUiElements = this.uiObjectsToTouchCheck.filter((uiObject) => uiObject.onScreenTouch.bind(uiObject)(e));
+    touchedUiElements.forEach(element => this.touchCallbacks[element.name] ? this.touchCallbacks[element.name]() : null);
   }
+
+  this.setupTouchHandling = () => {
+    let start = 0;
+    let continueId;
+    let startPosition = {
+      x: 0,
+      y: 0
+    }
+    let lastEvent;
+
+    function resetPressTimer() {
+      if (continueId) {
+        clearInterval(continueId);
+      }
+      start = 0;
+      lastEvent = null;
+      startPosition = {
+        x: 0,
+        y: 0,
+      }
+    }
+
+    Bangle.on('lock', function (on) {
+      if (!on) {
+        resetPressTimer();
+      }
+    });
+
+    function isStillOnStartPosition(startPosition, event) {
+      return Math.sqrt(Math.pow(startPosition.x - event.x, 2) + Math.pow(startPosition.y - event.y, 2)) < 2;
+    }
+
+    function onDrag(event) {
+
+      let isPressed = event.b === 1;
+      if (!(event.dx === 0 && event.dy === 0)) {
+        resetPressTimer();
+        return;
+      }
+      lastEvent = event;
+
+      if (isPressed && start === 0) {
+        start = Date.now();
+        startPosition = {
+          x: event.x,
+          y: event.y,
+        }
+        if (continueId) {
+          clearInterval(continueId);
+        }
+        continueId = setInterval(() => {
+
+          if (isStillOnStartPosition(startPosition, lastEvent)) {
+            this.buttonUpdate(lastEvent.x, lastEvent.y);
+          }
+        }, 250);
+      }
+      if (!isPressed) {
+        if (continueId) {
+          clearInterval(continueId);
+        }
+        let dif = Date.now() - start;
+
+        if (dif <= 250) {
+          if (lastEvent) {
+            if (isStillOnStartPosition(startPosition, lastEvent)) {
+              this.buttonUpdate(lastEvent.x, lastEvent.y);
+            }
+          }
+        }
+        resetPressTimer();
+      }
+
+    }
+
+    Bangle.on('drag', onDrag.bind(this));
+  }
+
   this.setupDragHandling = () => {
     const onDrag = (e) => {
       if (!this.pageSettings[this.currentPage]) return;
@@ -82,7 +161,7 @@ function Screen() {
     this.render();
   }
 
-  const globalFunctions = {r0: function(){if(!this.active)return;g.setColor(this.backgroundColor),g.fillRect(this.x,this.y,this.x+this.width,this.y+this.height),g.setColor(this.textColor),g.setFontVector(this.fontSize);const n=g.stringWidth(this.text);g.drawString(this.text,this.x+this.width/2-n/2,this.y+this.height/2-this.fontSize/2,!1)},
+  const globalFunctions = {r0: function(){if(!this.active)return;g.setColor(this.backgroundColor),g.fillRect(this.x,this.y,this.x+this.width,this.y+this.height),g.setColor(this.textColor),g.setFontVector(this.fontSize);const n=this.width-10,t=g.wrapString(this.text,n),e=t.reduce(((n,t)=>t.length>n.length?t:n),""),r=g.stringWidth(e),o=this.x+this.width/2-r/2,i=this.y+this.height/2-this.fontSize*(1===t.length?1:t.length)/2;g.drawString(t.join("\n"),o,i,!1)},
     o1: function(n){if(!this.active)return;const t=this.x-this.hitBoxOffsetXLeft<=n.x&&n.x<=this.x+this.width+this.hitBoxOffsetXRight&&this.y-this.hitBoxOffsetYTop<=n.y&&n.y<=this.y+this.height+this.hitBoxOffsetYBottom;return t&&this.vibrate&&Bangle.buzz(100,.2),t},
     m2: function(n,t){this.x+=n,this.y+=t},
   };
