@@ -149,15 +149,15 @@ function Screen() {
 
       if (Math.abs(deltaX) > Math.abs(deltaY)) {
         if (deltaX >= 0) {
-          this.swipeCallback(0, x1, y1, x2, y2);
+          this.swipeCallback('right', x1, y1, x2, y2);
         } else {
-          this.swipeCallback(1, x1, y1, x2, y2);
+          this.swipeCallback('left', x1, y1, x2, y2);
         }
       } else {
         if (deltaY >= 0) {
-          this.swipeCallback(2, x1, y1, x2, y2);
+          this.swipeCallback('down', x1, y1, x2, y2);
         } else {
-          this.swipeCallback(3, x1, y1, x2, y2);
+          this.swipeCallback('up', x1, y1, x2, y2);
 
         }
       }
