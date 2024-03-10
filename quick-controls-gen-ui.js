@@ -45,7 +45,6 @@ function Screen() {
   }
 
   this.onSwipe = function (swipeCallback) {
-    console.log('setiü swipe handler', swipeCallback, this)
     this.swipeCallback = swipeCallback;
   }
 
