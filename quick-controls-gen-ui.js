@@ -134,9 +134,8 @@ function Screen() {
     Bangle.on('drag', onDrag.bind(this));
   }
 
-  this.setupSwipeHandler = () => {
+  this.setupSwipeHandler = function() {
     Bangle.on('stroke', (stroke) => {
-      console.log('stroke', this.pageSettings[this.currentPage], this.swipeCallback)
       if (!this.pageSettings[this.currentPage]) return;
       if (!this.pageSettings[this.currentPage].swipeable || !this.swipeCallback) return;
       const xy = stroke.xy;
